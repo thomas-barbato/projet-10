@@ -1,5 +1,12 @@
+import datetime
+from datetime import timedelta
+
+import jwt
+
+import settings
+
 from django.contrib.auth.base_user import AbstractBaseUser
-from django.contrib.auth.models import BaseUserManager, AbstractBaseUser
+from django.contrib.auth.models import BaseUserManager, AbstractBaseUser, AbstractUser, UserManager, PermissionsMixin
 from django.db import models
 
 from rest_framework.permissions import (
@@ -13,7 +20,7 @@ from .choices.db_choices import (
     PRIORITY_CHOICES,
     TAG_CHOICES,
     TASK_STATUS_CHOICES,
-    PROJECT_TYPE,
+    PROJECT_TYPE, CONTRIBUTOR_CHOICES,
 )
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "api.settings")
@@ -48,39 +55,38 @@ class MyUserManager(BaseUserManager):
         user.save(using=self._db)
         return user
 
-
-class Users(AbstractBaseUser):
+# https://thinkster.io/tutorials/django-json-api/authentication
+class Users(AbstractUser):
     user_id = models.AutoField(primary_key=True, editable=False)
-    email = models.EmailField(
-        max_length=255,
-        unique=True,
-    )
-    first_name = models.CharField(max_length=150, blank=True)
-    last_name = models.CharField(max_length=150, blank=True)
-    password = models.CharField(max_length=150)
-    permissions = models.ManyToManyField(
-        blank=True,
-        related_query_name="users",
-        to="auth.permission",
-        verbose_name="user permissions",
-    )
 
-    USERNAME_FIELD = "email"
-    ID_FIELD = "user_id"
-    REQUIRED_FIELDS = ["password"]
+    first_name = models.CharField(max_length=128, blank=True)
+    last_name = models.CharField(max_length=128, blank=True)
+    email = models.EmailField(blank=False, unique=True)
+    password = models.CharField(max_length=255, blank=False)
+    is_admin = models.BooleanField(default=False)
+    username = models.CharField(max_length=255, blank=True)
+    is_staff = models.BooleanField(default=False)
+    is_active = models.BooleanField(default=True)
+    date_joined = models.DateTimeField(auto_now_add=True)
 
-    def __str__(self):
-        return self.email
+    objects = UserManager()
+
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = ['first_name', 'last_name']
 
     def has_perm(self, perm, obj=None):
-        "Does the user have a specific permission?"
-        # Simplest possible answer: Yes, always
         return True
 
     def has_module_perms(self, app_label):
-        "Does the user have permissions to view the app `app_label`?"
-        # Simplest possible answer: Yes, always
         return True
+
+    def __str__(self):
+        """
+        Returns a string representation of this `User`.
+
+        This string is used when a `User` is printed in the console.
+        """
+        return self.email
 
 
 class Projects(models.Model):
@@ -98,7 +104,9 @@ class Projects(models.Model):
 class Contributors(models.Model):
     user = models.ForeignKey(Users, on_delete=models.RESTRICT)
     project = models.ForeignKey(Projects, on_delete=models.RESTRICT)
-    role = models.CharField(max_length=150)
+    role = models.CharField(
+        max_length=15, choices=CONTRIBUTOR_CHOICES, default=CONTRIBUTOR_CHOICES[0][1]
+    )
 
     class Meta:
         permissions = [

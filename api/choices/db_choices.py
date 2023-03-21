@@ -25,3 +25,12 @@ PROJECT_TYPE = [
     (PRODUCT, "product"),
     (APPLICATION, "application"),
 ]
+
+CREATOR = "createur"
+ADMIN = "administrateur"
+TECHNICIAN = "technician"
+CONTRIBUTOR_CHOICES = [
+    (CREATOR, "creator"),
+    (ADMIN, "admin"),
+    (TECHNICIAN, "technician")
+]

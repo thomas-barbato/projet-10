@@ -1,43 +1,46 @@
 """import """
-from django.contrib.auth.password_validation import validate_password
-import re
-from django.http import JsonResponse
-from rest_framework.response import Response
-from rest_framework import serializers
-from rest_framework import status
-from rest_framework.validators import UniqueValidator
-from rest_framework_simplejwt.views import TokenObtainPairView
+import json
 
-from .models import Users, Projects, Issues, Comments
+from django.contrib.auth import authenticate, get_user_model
+from django.http import JsonResponse
+from rest_framework import serializers, status
+from rest_framework.response import Response
+from rest_framework.validators import UniqueValidator
+from rest_framework_simplejwt.serializers import (
+    TokenObtainPairSerializer,
+    PasswordField, TokenObtainSerializer,
+)
+from rest_framework_simplejwt.tokens import RefreshToken
+from sqlparse.compat import text_type
+
+from .choices.db_choices import PROJECT_TYPE
+from .models import Users, Projects, Issues, Comments, Contributors
+from .utils import get_tokens_for_user
 from .validators.check_data import CheckPasswordPolicy
 
 
 class UserSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Users
-        fields = ["user_id", "email"]
-
-
-class LoginUserSerializer(serializers.ModelSerializer):
-    password = serializers.CharField(style={"input_type": "password"}, write_only=True)
-
-    class Meta:
-        model = Users
-        fields = ["email", "password"]
-
-
-class RegisterUserSerializer(serializers.ModelSerializer):
+    password = serializers.CharField(
+        style={"input_type": "password"}, write_only=True
+    )
+    password2 = serializers.CharField(
+        style={"input_type": "password"}, write_only=True
+    )
     email = serializers.EmailField(
         required=True, validators=[UniqueValidator(queryset=Users.objects.all())]
     )
-    password = serializers.CharField(style={"input_type": "password"}, write_only=True)
-    password2 = serializers.CharField(style={"input_type": "password"}, write_only=True)
 
     class Meta:
         model = Users
-        fields = ["email", "password", "password2", "first_name", "last_name"]
+        fields = (
+            "email",
+            "password",
+            "password2",
+            "first_name",
+            "last_name"
+        )
 
-    def save(self):
+    def create(self, validated_data):
         user = Users(
             email=self.validated_data["email"],
             first_name=self.validated_data["first_name"],
@@ -49,3 +52,115 @@ class RegisterUserSerializer(serializers.ModelSerializer):
         user.set_password(password)
         user.save()
         return user
+
+
+class ProjectSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Projects
+        fields = (
+            "title",
+            "description",
+            "type",
+        )
+
+    def create(self, validated_data):
+        project = Projects(
+            title=self.validated_data["title"],
+            description=self.validated_data["description"],
+            type=self.validated_data["type"],
+        )
+        project.save()
+        contributor = Contributors(
+            role="creator",
+            project_id=project.project,
+            user_id=self.user.user_id,
+        )
+        return project
+
+
+class ContributorSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Contributors
+        fields = (
+            "__all__"
+        )
+
+
+class IssueSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Issues
+        fields = (
+            "__all__"
+        )
+
+
+class CommentSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Comments
+        fields = (
+            "__all__"
+        )
+
+
+class LoginUserSerializer(serializers.ModelSerializer):
+    password = serializers.CharField(style={"input_type": "password"}, write_only=True)
+
+    class Meta:
+        model = Users
+        fields = ["email", "password"]
+
+
+class MyTokenObtainSerializer(TokenObtainSerializer):
+    username_field = Users.USERNAME_FIELD
+
+    class Meta:
+        model = Users
+        fields = ["email", "password"]
+
+    def __init__(self, *args, **kwargs):
+        super(MyTokenObtainSerializer, self).__init__(*args, **kwargs)
+
+        self.fields[self.username_field] = serializers.EmailField()
+        self.fields["password"] = serializers.CharField()
+
+    def validate(self, attrs):
+        # self.user = authenticate(**{
+        #     self.username_field: attrs[self.username_field],
+        #     'password': attrs['password'],
+        # })
+        self.user = Users.objects.filter(email=attrs[self.username_field]).first()
+
+        if not self.user:
+            raise serializers.ValidationError('The user is not valid.')
+
+        if self.user:
+            if not self.user.check_password(attrs['password']):
+                raise serializers.ValidationError('Incorrect credentials.')
+        if self.user is None or not self.user.is_active:
+            raise serializers.ValidationError('No active account found with the given credentials')
+
+        #return JsonResponse({}, status=status.HTTP_200_OK)
+        return {}
+
+    @classmethod
+    def get_token(cls, user):
+        raise NotImplemented(
+            'Must implement `get_token` method for `MyTokenObtainSerializer` subclasses')
+
+
+class MyTokenObtainPairSerializer(MyTokenObtainSerializer):
+    @classmethod
+    def get_token(cls, user):
+        return RefreshToken.for_user(user)
+
+    def validate(self, attrs):
+        data = super(MyTokenObtainPairSerializer, self).validate(attrs)
+        refresh = self.get_token(self.user)
+
+        data['refresh'] = str(refresh)
+        data['access'] = str(refresh.access_token)
+
+        return data

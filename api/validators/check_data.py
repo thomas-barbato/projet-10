@@ -27,9 +27,7 @@ class CheckPasswordPolicy:
         """
         if password != password2:
             raise serializers.ValidationError(
-                {
-                    "password": 'Les mots de passe saisis ne sont pas identiques'
-                }
+                {"password": "Les mots de passe saisis ne sont pas identiques"}
             )
         if re.match(self.password_pattern, password) is None:
             raise serializers.ValidationError(

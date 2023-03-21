@@ -1,58 +1,63 @@
 from django.contrib.auth import authenticate, login, logout
+from django.db.models import Q
+from django.http import JsonResponse
+from django.shortcuts import get_object_or_404
+from rest_framework import viewsets
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from .serializers import LoginUserSerializer, RegisterUserSerializer, UserSerializer
-from .models import Users, Projects, Issues, Comments
-from rest_framework.authentication import TokenAuthentication
+from rest_framework.viewsets import ModelViewSet
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+
+from .serializers import (
+    UserSerializer,
+    LoginUserSerializer,
+    ProjectSerializer, ContributorSerializer, CommentSerializer, IssueSerializer,
+    MyTokenObtainPairSerializer
+)
+from .models import Users, Projects, Issues, Comments, Contributors
 from rest_framework import status, permissions
 from rest_framework.generics import RetrieveAPIView
-
 from .utils import get_tokens_for_user
+from api.models import Users
+
+# Rest Framework imports
+from rest_framework_simplejwt.views import TokenObtainPairView
 
 
-class UserDetailsAPIView(RetrieveAPIView):
-    permission_classes = (IsAuthenticated,)
+class UserViewset(ModelViewSet):
+    permission_classes = (AllowAny,)
     serializer_class = UserSerializer
-
-    def get_object(self):
-        return self.request.user
+    queryset = Users.objects.all()
 
 
-class RegisterUserAPIView(APIView):
-    permission_classes = (AllowAny,)
-    serializer_class = RegisterUserSerializer
-
-    def post(self, request):
-        user = request.data
-        serializer = RegisterUserSerializer(data=user)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+class MyTokenObtainPairView(TokenObtainPairView):
+    """
+    Takes a set of user credentials and returns an access and refresh JSON web
+    token pair to prove the authentication of those credentials.
+    """
+    serializer_class = MyTokenObtainPairSerializer
 
 
-class LoginAPIView(APIView):
-    permission_classes = (AllowAny,)
-    serializer_class = LoginUserSerializer
+class ProjectViewset(viewsets.ModelViewSet):
+    serializer_class = ProjectSerializer
+    permissions = (IsAuthenticated,)
+    queryset = Projects.objects.all()
 
-    def post(self, request):
-        if 'email' not in request.data or 'password' not in request.data:
-            return Response({'msg': 'Identifiants manquants...'}, status=status.HTTP_400_BAD_REQUEST)
-        email = request.POST['email']
-        password = request.POST['password']
-        print(request.data)
-        user = authenticate(request, username=email, password=password)
-        if user is not None:
-            login(request, user)
-            auth_data = get_tokens_for_user(user)
-            return Response({'msg': 'Login Success', **auth_data}, status=status.HTTP_200_OK)
-        return Response({'msg': 'Identifiants incorrectes'}, status=status.HTTP_401_UNAUTHORIZED)
+class ContributorViewset(viewsets.ModelViewSet):
+    serializer_class = ContributorSerializer
+    permissions = (IsAuthenticated,)
+    queryset = Contributors.objects.all()
 
 
-@permission_classes((permissions.AllowAny,))
-class LogoutView(APIView):
-    def post(self, request):
-        logout(request)
-        return Response({'msg': 'Successfully Logged out'}, status=status.HTTP_200_OK)
+class IssueViewset(viewsets.ViewSet):
+    serializer_class = IssueSerializer
+    permissions = (IsAuthenticated, )
+    queryset = Issues.objects.all()
+
+
+class CommentViewset(viewsets.ViewSet):
+    serializer_class = CommentSerializer
+    permissions = (IsAuthenticated, )
+    queryset = Comments.objects.all()
