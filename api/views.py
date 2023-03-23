@@ -43,10 +43,9 @@ class MyTokenObtainPairView(TokenObtainPairView):
 
 
 class ProjectViewset(ModelViewSet):
-    #authentication_classes = [SessionAuthentication, BasicAuthentication]
     serializer_class = ProjectSerializer
     queryset = Projects.objects.all()
-    permission_classes = (AllowAny,)
+    permission_classes = (IsAuthenticated,)
 
     def create(self, request, *args, **kwargs):
         print(request.data)
@@ -61,11 +60,12 @@ class ProjectViewset(ModelViewSet):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    def update(self, request, pk=None):
+    def update(self, request, *args, **kwargs):
         pass
 
-    def partial_update(self, request, pk=None):
+    def partial_update(self, request, *args, **kwargs):
         pass
+
 
 class ContributorViewset(viewsets.ModelViewSet):
     serializer_class = ContributorSerializer
