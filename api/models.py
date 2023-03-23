@@ -90,7 +90,7 @@ class Users(AbstractUser):
 
 
 class Projects(models.Model):
-    project = models.PositiveIntegerField(primary_key=True, editable=False)
+    project = models.AutoField(primary_key=True, editable=False)
     title = models.CharField(max_length=500)
     description = models.CharField(max_length=500)
     type = models.CharField(

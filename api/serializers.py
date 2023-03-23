@@ -17,6 +17,7 @@ from .choices.db_choices import PROJECT_TYPE
 from .models import Users, Projects, Issues, Comments, Contributors
 from .utils import get_tokens_for_user
 from .validators.check_data import CheckPasswordPolicy
+from rest_framework.authtoken.models import Token
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -51,10 +52,17 @@ class UserSerializer(serializers.ModelSerializer):
         CheckPasswordPolicy().validate(password=password, password2=password2)
         user.set_password(password)
         user.save()
+        token = Token.objects.create(user=user)
+        print(token.key)
+
         return user
 
 
 class ProjectSerializer(serializers.ModelSerializer):
+    title = serializers.CharField()
+    description = serializers.CharField()
+    type = serializers.ChoiceField(choices=PROJECT_TYPE, default=PROJECT_TYPE[0][1])
+
     class Meta:
         model = Projects
         fields = (
@@ -62,20 +70,6 @@ class ProjectSerializer(serializers.ModelSerializer):
             "description",
             "type",
         )
-
-    def create(self, validated_data):
-        project = Projects(
-            title=self.validated_data["title"],
-            description=self.validated_data["description"],
-            type=self.validated_data["type"],
-        )
-        project.save()
-        contributor = Contributors(
-            role="creator",
-            project_id=project.project,
-            user_id=self.user.user_id,
-        )
-        return project
 
 
 class ContributorSerializer(serializers.ModelSerializer):
@@ -122,7 +116,7 @@ class MyTokenObtainSerializer(TokenObtainSerializer):
 
     def __init__(self, *args, **kwargs):
         super(MyTokenObtainSerializer, self).__init__(*args, **kwargs)
-
+        print("dedans")
         self.fields[self.username_field] = serializers.EmailField()
         self.fields["password"] = serializers.CharField()
 

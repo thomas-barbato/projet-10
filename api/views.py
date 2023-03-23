@@ -3,6 +3,8 @@ from django.db.models import Q
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 from rest_framework import viewsets
+from rest_framework.authentication import SessionAuthentication, BasicAuthentication
+from rest_framework.decorators import action
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.views import APIView
@@ -40,24 +42,85 @@ class MyTokenObtainPairView(TokenObtainPairView):
     serializer_class = MyTokenObtainPairSerializer
 
 
-class ProjectViewset(viewsets.ModelViewSet):
+class ProjectViewset(ModelViewSet):
+    authentication_classes = [SessionAuthentication, BasicAuthentication]
     serializer_class = ProjectSerializer
-    permissions = (IsAuthenticated,)
     queryset = Projects.objects.all()
+    permission_classes = (IsAuthenticated,)
+
+    def create(self, request, *args, **kwargs):
+        print(request.data)
+        serializer = ProjectSerializer(data=request.data)
+        if serializer.is_valid():
+            project = Projects(**serializer.data)
+            project.save()
+            Contributors(
+                project_id=project.project,
+                user_id=11
+            ).save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def retrieve(self, request, *args, **kwargs):
+        queryset = get_object_or_404(Projects.objects.all(), pk=11)
+        serializer = ProjectSerializer(queryset, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def update(self, request, pk=None):
+        pass
+
+    def partial_update(self, request, pk=None):
+        pass
+
+    def destroy(self, request, *args, **kwargs):
+        queryset = get_object_or_404(Projects, pk=kwargs['pk'])
+        print(kwargs['pk'])
+        print(queryset)
+        Contributors.objects.filter(project_id=kwargs['pk']).delete()
+        project = Projects(**queryset)
+        project.delete()
+        return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class ContributorViewset(viewsets.ModelViewSet):
     serializer_class = ContributorSerializer
-    permissions = (IsAuthenticated,)
+    permission_classes = [AllowAny]
     queryset = Contributors.objects.all()
 
 
 class IssueViewset(viewsets.ViewSet):
     serializer_class = IssueSerializer
-    permissions = (IsAuthenticated, )
+    permission_classes = [AllowAny]
     queryset = Issues.objects.all()
 
 
 class CommentViewset(viewsets.ViewSet):
     serializer_class = CommentSerializer
-    permissions = (IsAuthenticated, )
+    permission_classes = [AllowAny]
     queryset = Comments.objects.all()
+
+    def list(self, request):
+        print(request.user)
+        queryset = Projects.objects.all()
+        serializer = ProjectSerializer(queryset, many=True)
+        return Response(serializer.data)
+
+    def create(self, request):
+        queryset = Comments()
+        serializer = CommentSerializer(self.queryset, many=False)
+        return Response(serializer.data)
+
+    def retrieve(self, request, pk=None):
+        contrib = Contributors.objects.filter(user_id=request.user.user_id).values('project_id')
+        queryset = Projects.objects.all(project_id__in=contrib)
+        serializer = ProjectSerializer(queryset, many=True)
+        return Response(serializer.data)
+
+    def update(self, request, pk=None):
+        pass
+
+    def partial_update(self, request, pk=None):
+        pass
+
+    def destroy(self, request, pk=None):
+        pass
