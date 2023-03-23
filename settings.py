@@ -40,7 +40,6 @@ INSTALLED_APPS = [
     "rest_framework",
     "rest_framework_simplejwt",
     'rest_framework_simplejwt.token_blacklist',
-    'rest_framework.authtoken',
     "api",
 ]
 
@@ -56,38 +55,34 @@ MIDDLEWARE = [
 
 
 REST_FRAMEWORK = {
-    #"DEFAULT_PERMISSION_CLASSES": (
-    #    "rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly",
-    #    "rest_framework.permissions.IsAuthenticated",
-    #    "rest_framework.permissions.AllowAny",
-    #    "rest_framework.permissions.IsAdminUser",
-    #    "rest_framework.permissions.IsAuthenticatedOrReadOnly",
-    #),
-    'DEFAULT_PERMISSION_CLASSES': (
-        "rest_framework.permissions.AllowAny",
+    "DEFAULT_AUTHENTICATION_CLASSES": (
+        "rest_framework_simplejwt.authentication.JWTAuthentication",
+        "rest_framework.authentication.SessionAuthentication",
     ),
-    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
-    'PAGE_SIZE': 100,
-    "DEFAULT_AUTHENTIFICATION_CLASSES": (
-        #"rest_framework_simplejwt.authentication.JWTAuthentication",
-        'rest_framework.authentication.TokenAuthentication',
-        'rest_framework.authentication.SessionAuthentication',
-    ),
+    "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.LimitOffsetPagination",
+    "PAGE_SIZE": 5,
 }
 
 
-JWT_AUTH = {
-    "JWT_VERIFY": True,
-    "JWT_VERIFY_EXPIRATION": True,
-    "JWT_EXPIRATION_DELTA": timedelta(days=1),
-    "JWT_AUTH_HEADER_PREFIX": "Bearer",
-}
+# JWT_AUTH = {
+#     "JWT_VERIFY": True,
+#     "JWT_VERIFY_EXPIRATION": True,
+#     "JWT_EXPIRATION_DELTA": timedelta(days=1),
+#     "JWT_AUTH_HEADER_PREFIX": "Bearer",
+# }
 AUTH_USER_MODEL = "api.Users"
 AUTHENTICATION_BACKENDS = ["api.backend.customBackend.EmailModelBackend"]
 
 DEFAULTS = {"USER_ID_FIELD": "user_id"}
 
 SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(days=60),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
+    "JWT_VERIFY": True,
+    "JWT_VERIFY_EXPIRATION": True,
+    "JWT_SECRET_KEY": SECRET_KEY,
+    "JWT_ALGORITHM": "HS256",
+    "JWT_AUTH_HEADER_PREFIX": "Bearer",
     "TOKEN_OBTAIN_SERIALIZER": "api.serializers.EmailPairSerializer",
     "USER_ID_FIELD": "user_id",
     "USER_ID_CLAIM": "user_id",
