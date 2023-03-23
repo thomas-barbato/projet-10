@@ -10,6 +10,7 @@ from .views import (
 from rest_framework_simplejwt.views import (
     TokenObtainPairView,
     TokenRefreshView,
+    TokenVerifyView,
 )
 from rest_framework.routers import SimpleRouter
 from rest_framework_nested import routers
@@ -43,4 +44,5 @@ urlpatterns = [
     path("signup/", UserViewset.as_view({'post': 'create'}), name="signup"),
     path('login/', MyTokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+    path('token/verify/', TokenVerifyView.as_view(), name='token_verify'),
 ]
