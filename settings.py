@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "rest_framework",
     "rest_framework_simplejwt",
+    'rest_framework_simplejwt.token_blacklist',
     "api",
 ]
 
@@ -54,6 +55,21 @@ MIDDLEWARE = [
 
 
 REST_FRAMEWORK = {
+    "DEFAULT_AUTHENTICATION_CLASSES": (
+        "rest_framework_simplejwt.authentication.JWTAuthentication",
+        "rest_framework.authentication.SessionAuthentication",
+    ),
+    "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.LimitOffsetPagination",
+    "PAGE_SIZE": 5,
+}
+
+
+# JWT_AUTH = {
+#     "JWT_VERIFY": True,
+#     "JWT_VERIFY_EXPIRATION": True,
+#     "JWT_EXPIRATION_DELTA": timedelta(days=1),
+#     "JWT_AUTH_HEADER_PREFIX": "Bearer",
+# }
     "DEFAULT_AUTHENTIFICATION_CLASSES": (
         "rest_framework_simplejwt.authentication.JWTAuthentication",
         'rest_framework.authentication.SessionAuthentication',
@@ -68,15 +84,14 @@ AUTHENTICATION_BACKENDS = ["api.backend.customBackend.EmailModelBackend"]
 DEFAULTS = {"USER_ID_FIELD": "user_id"}
 
 SIMPLE_JWT = {
-    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=5),
+    "ACCESS_TOKEN_LIFETIME": timedelta(days=60),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
-
     "JWT_VERIFY": True,
     "JWT_VERIFY_EXPIRATION": True,
     "JWT_SECRET_KEY": SECRET_KEY,
     "JWT_ALGORITHM": "HS256",
     "JWT_AUTH_HEADER_PREFIX": "Bearer",
-    "TOKEN_OBTAIN_SERIALIZER": "rest_framework_simplejwt.serializers.TokenObtainPairSerializer",
+    "TOKEN_OBTAIN_SERIALIZER": "api.serializers.EmailPairSerializer",
     "USER_ID_FIELD": "user_id",
     "USER_ID_CLAIM": "user_id",
 }
