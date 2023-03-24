@@ -49,7 +49,6 @@ class ProjectViewset(ModelViewSet):
     permission_classes = (IsAuthenticated,)
 
     def create(self, request, *args, **kwargs):
-        print(request.data)
         serializer = ProjectSerializer(data=request.data)
         if serializer.is_valid():
             project = Projects(**serializer.data)

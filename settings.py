@@ -70,13 +70,6 @@ REST_FRAMEWORK = {
 #     "JWT_EXPIRATION_DELTA": timedelta(days=1),
 #     "JWT_AUTH_HEADER_PREFIX": "Bearer",
 # }
-    "DEFAULT_AUTHENTIFICATION_CLASSES": (
-        "rest_framework_simplejwt.authentication.JWTAuthentication",
-        'rest_framework.authentication.SessionAuthentication',
-    ),
-    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
-    'PAGE_SIZE': 5,
-}
 
 AUTH_USER_MODEL = "api.Users"
 AUTHENTICATION_BACKENDS = ["api.backend.customBackend.EmailModelBackend"]
