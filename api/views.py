@@ -61,11 +61,12 @@ class ProjectViewset(ModelViewSet):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    def update(self, request, pk=None):
+    def update(self, request, *args, **kwargs):
         pass
 
-    def partial_update(self, request, pk=None):
+    def partial_update(self, request, *args, **kwargs):
         pass
+
 
 class ContributorViewset(viewsets.ModelViewSet):
     serializer_class = ContributorSerializer
