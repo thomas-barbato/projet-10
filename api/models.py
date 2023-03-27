@@ -1,26 +1,12 @@
-import datetime
-from datetime import timedelta
 
-import jwt
-
-import settings
-
-from django.contrib.auth.base_user import AbstractBaseUser
-from django.contrib.auth.models import BaseUserManager, AbstractBaseUser, AbstractUser, UserManager, PermissionsMixin
+from django.contrib.auth.models import BaseUserManager, AbstractUser, UserManager
 from django.db import models
-
-from rest_framework.permissions import (
-    IsAdminUser,
-    BasePermission,
-    IsAuthenticated,
-)
 import os
-import re
 from .choices.db_choices import (
     PRIORITY_CHOICES,
     TAG_CHOICES,
-    TASK_STATUS_CHOICES,
-    PROJECT_TYPE, CONTRIBUTOR_CHOICES,
+    STATUS_CHOICES,
+    PROJECT_CHOICES,
 )
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "api.settings")
@@ -41,10 +27,6 @@ class MyUserManager(BaseUserManager):
         return users
 
     def create_superuser(self, email, password, first_name=None, last_name=None):
-        """
-        Creates and saves a superuser with the given email, date of
-        birth and password.
-        """
         user = self.create_user(
             email,
             password=password,
@@ -54,6 +36,7 @@ class MyUserManager(BaseUserManager):
         user.is_admin = True
         user.save(using=self._db)
         return user
+
 
 # https://thinkster.io/tutorials/django-json-api/authentication
 class Users(AbstractUser):
@@ -81,60 +64,45 @@ class Users(AbstractUser):
         return True
 
     def __str__(self):
-        """
-        Returns a string representation of this `User`.
-
-        This string is used when a `User` is printed in the console.
-        """
         return self.email
 
 
 class Projects(models.Model):
     project = models.AutoField(primary_key=True, editable=False)
-    title = models.CharField(max_length=500)
-    description = models.CharField(max_length=500)
+    title = models.CharField(max_length=100)
+    description = models.CharField(max_length=255)
     type = models.CharField(
-        max_length=15, choices=PROJECT_TYPE, default=PROJECT_TYPE[0][1]
+        max_length=15, choices=PROJECT_CHOICES
     )
+    author_user = models.ForeignKey(Users, related_name='project_created_by', on_delete=models.RESTRICT)
 
     def __str__(self):
         return self.title
 
 
 class Contributors(models.Model):
-    user = models.ForeignKey(Users, on_delete=models.RESTRICT)
-    project = models.ForeignKey(Projects, on_delete=models.RESTRICT)
-    role = models.CharField(
-        max_length=15, choices=CONTRIBUTOR_CHOICES, default=CONTRIBUTOR_CHOICES[0][1]
-    )
-
-    class Meta:
-        permissions = [
-            ("DELETE", "can delete"),
-            ("EDIT", "can edit ticket"),
-            ("CLOSE", "can close ticket"),
-            ("ONLY_READ", "can only read"),
-        ]
+    user = models.ForeignKey(Users, related_name='user_contributor', on_delete=models.CASCADE)
+    project = models.ForeignKey(Projects, related_name='project_contributor', on_delete=models.CASCADE)
 
 
 class Issues(models.Model):
-    title = models.CharField(max_length=500)
-    desc = models.CharField(max_length=500)
+    title = models.CharField(max_length=100, blank=False)
+    desc = models.CharField(max_length=255)
     tag = models.CharField(
-        max_length=15, choices=TAG_CHOICES, default=TAG_CHOICES[2][1]
+        max_length=15, choices=TAG_CHOICES
     )
     priority = models.CharField(
-        max_length=15, choices=PRIORITY_CHOICES, default=PRIORITY_CHOICES[1][1]
+        max_length=15, choices=PRIORITY_CHOICES
     )
-    project = models.ForeignKey(Projects, on_delete=models.RESTRICT)
+    project = models.ForeignKey(Projects, on_delete=models.CASCADE)
     status = models.CharField(
-        max_length=15, choices=TASK_STATUS_CHOICES, default=TASK_STATUS_CHOICES[0][1]
+        max_length=15, choices=STATUS_CHOICES
     )
     author_user = models.ForeignKey(
-        Users, related_name="author", on_delete=models.RESTRICT
+        Users, related_name="issue_author", on_delete=models.RESTRICT
     )
     assignee_user = models.ForeignKey(
-        Users, related_name="assignee", on_delete=models.RESTRICT
+        Users, related_name="issue_assigned_to", on_delete=models.RESTRICT
     )
     created_time = models.DateTimeField("Created Time", auto_now_add=True)
 
@@ -145,6 +113,6 @@ class Issues(models.Model):
 class Comments(models.Model):
     comment_id = models.PositiveIntegerField(primary_key=True)
     description = models.CharField(max_length=500)
-    author_user = models.ForeignKey(Users, on_delete=models.RESTRICT)
+    author_user = models.ForeignKey(Users, on_delete=models.CASCADE)
     issue = models.ForeignKey(Issues, on_delete=models.RESTRICT)
     created_time = models.DateTimeField("Created Time", auto_now_add=True)

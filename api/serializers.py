@@ -13,7 +13,7 @@ from rest_framework_simplejwt.serializers import (
 from rest_framework_simplejwt.tokens import RefreshToken
 from sqlparse.compat import text_type
 
-from .choices.db_choices import PROJECT_TYPE
+from .choices.db_choices import PROJECT_CHOICES
 from .models import Users, Projects, Issues, Comments, Contributors
 from .utils import get_tokens_for_user
 from .validators.check_data import CheckPasswordPolicy
@@ -61,7 +61,7 @@ class UserSerializer(serializers.ModelSerializer):
 class ProjectSerializer(serializers.ModelSerializer):
     title = serializers.CharField()
     description = serializers.CharField()
-    type = serializers.ChoiceField(choices=PROJECT_TYPE, default=PROJECT_TYPE[0][1])
+    type = serializers.ChoiceField(choices=PROJECT_CHOICES, default=PROJECT_CHOICES[0][1])
 
     class Meta:
         model = Projects
@@ -70,6 +70,21 @@ class ProjectSerializer(serializers.ModelSerializer):
             "description",
             "type",
         )
+
+    def create(self, validated_data):
+        author_user_id = self.context.get("request", None).user
+        project = Projects(
+            title=validated_data["title"],
+            description=validated_data["description"],
+            type=validated_data["type"],
+            author_user=author_user_id
+        )
+        project.save()
+        Contributors(
+            project_id=project.project,
+            user_id=author_user_id.user_id
+        ).save()
+        return project
 
 
 class ContributorSerializer(serializers.ModelSerializer):
