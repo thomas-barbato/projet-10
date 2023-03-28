@@ -2,6 +2,7 @@ from rest_framework import viewsets
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
+from django.shortcuts import get_object_or_404
 
 from .permissions import IsAuthorOrReadOnly
 from .serializers import (
@@ -44,41 +45,52 @@ class ContributorViewset(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticated, IsAuthorOrReadOnly)
     queryset = Contributors.objects.all()
 
-    def list(self, request, project_pk=None):
-        queryset = Contributors.objects.filter(project_id=project_pk)
+    def list(self, request, **kwargs):
+        queryset = Contributors.objects.filter(project_id=kwargs.get("project_pk"))
         serializer = ContributorSerializer(queryset, many=True)
         return Response(serializer.data)
 
+    def destroy(self, request, project_pk=None, pk=None):
+        query = get_object_or_404(self.queryset, project_id=project_pk, user_id=pk)
+        if query:
+            query.delete()
+            return Response({"delete": "success"}, status=status.HTTP_202_ACCEPTED)
+        return Response({"contributor": "not found"}, status=status.HTTP_404_NOT_FOUND)
 
-class IssueViewset(viewsets.ViewSet):
+
+class IssueViewset(viewsets.ModelViewSet):
     serializer_class = IssueSerializer
     authorization_classes = []
     permission_classes = (IsAuthenticated, IsAuthorOrReadOnly)
     queryset = Issues.objects.all()
 
+    def list(self, request, **kwargs):
+        queryset = Issues.objects.filter(project_id=kwargs.get("project_pk"))
+        serializer = IssueSerializer(queryset, many=True)
+        return Response(serializer.data)
 
-class CommentViewset(viewsets.ViewSet):
+    def destroy(self, request, project_pk=None, pk=None):
+        query = get_object_or_404(self.queryset, project_id=project_pk, id=pk)
+        if query:
+            query.delete()
+            return Response({"delete": "success"}, status=status.HTTP_202_ACCEPTED)
+        return Response({"issue": "not found"}, status=status.HTTP_404_NOT_FOUND)
+
+
+class CommentViewset(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
     authorization_classes = []
     permission_classes = (IsAuthenticated, IsAuthorOrReadOnly)
     queryset = Comments.objects.all()
 
-    def list(self, request):
-        print(request.user)
-        queryset = Projects.objects.all()
-        serializer = ProjectSerializer(queryset, many=True)
+    def list(self, request, **kwargs):
+        queryset = Comments.objects.filter(issue_id=kwargs.get('issue_pk'))
+        serializer = CommentSerializer(queryset, many=True)
         return Response(serializer.data)
 
-    def create(self, request):
-        queryset = Comments()
-        serializer = CommentSerializer(self.queryset, many=False)
-        return Response(serializer.data)
-
-    def retrieve(self, request, pk=None):
-        contrib = Contributors.objects.filter(user_id=request.user.user_id).values('project_id')
-        queryset = Projects.objects.all(project_id__in=contrib)
-        serializer = ProjectSerializer(queryset, many=True)
-        return Response(serializer.data)
-
-    def destroy(self, request, pk=None):
-        pass
+    def destroy(self, request, project_pk=None, issue_pk=None, pk=None):
+        query = get_object_or_404(self.queryset, issue_id=issue_pk, comment_id=pk)
+        if query:
+            query.delete()
+            return Response({"delete": "success"}, status=status.HTTP_202_ACCEPTED)
+        return Response({"issue": "not found"}, status=status.HTTP_404_NOT_FOUND)

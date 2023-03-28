@@ -17,25 +17,24 @@ from rest_framework_nested import routers
 
 
 # doc : https://github.com/alanjds/drf-nested-routers
-
-base_router = routers.DefaultRouter()
-base_router.register(r'projects', ProjectViewset, basename="projects")
 ## generates:
 # /projects/
 # /projects/{pk}/
-projects_router = routers.NestedSimpleRouter(base_router, r'projects', lookup='project')
-projects_router.register(r'users', ContributorViewset, basename="user")
+base_router = routers.DefaultRouter()
+base_router.register(r'projects', ProjectViewset, basename="projects")
 ## generates:
 # /projects/{project_pk}/users/
 # /projects/{project_pk}/users/{contributor_pk}/
-projects_router.register(r'issues', IssueViewset, basename='issues')
-projects_router.register(r'users', ContributorViewset, basename="users")
-issues_router = routers.NestedSimpleRouter(projects_router, r'issues', lookup='issue')
-issues_router.register(r'comments', CommentViewset, basename='comments')
+projects_router = routers.NestedSimpleRouter(base_router, r'projects', lookup='project')
+users_router = routers.NestedSimpleRouter(base_router, r'projects', lookup='user')
+projects_router.register(r'users', ContributorViewset)
 ## generates:
 # /projects/{project_pk}/issues/
 # /projects/{project_pk}/issues/{issues_pk}/
 # /projects/{project_pk}/issues/{issues_pk}/comments
+projects_router.register(r'issues', IssueViewset)
+issues_router = routers.NestedSimpleRouter(projects_router, r'issues', lookup='issue')
+issues_router.register(r'comments', CommentViewset, basename='comments')
 
 urlpatterns = [
     path("", include(base_router.urls)),

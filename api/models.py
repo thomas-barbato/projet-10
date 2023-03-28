@@ -111,7 +111,7 @@ class Issues(models.Model):
 
 
 class Comments(models.Model):
-    comment_id = models.PositiveIntegerField(primary_key=True)
+    comment_id = models.AutoField(primary_key=True, editable=False)
     description = models.CharField(max_length=500)
     author_user = models.ForeignKey(Users, on_delete=models.CASCADE)
     issue = models.ForeignKey(Issues, on_delete=models.RESTRICT)

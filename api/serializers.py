@@ -13,7 +13,7 @@ from rest_framework_simplejwt.serializers import (
 from rest_framework_simplejwt.tokens import RefreshToken
 from sqlparse.compat import text_type
 
-from .choices.db_choices import PROJECT_CHOICES
+from .choices.db_choices import PROJECT_CHOICES, TAG_CHOICES, PRIORITY_CHOICES, STATUS_CHOICES
 from .models import Users, Projects, Issues, Comments, Contributors
 from .utils import get_tokens_for_user
 from .validators.check_data import CheckPasswordPolicy
@@ -53,7 +53,6 @@ class UserSerializer(serializers.ModelSerializer):
         user.set_password(password)
         user.save()
         token = Token.objects.create(user=user)
-        print(token.key)
 
         return user
 
@@ -61,7 +60,7 @@ class UserSerializer(serializers.ModelSerializer):
 class ProjectSerializer(serializers.ModelSerializer):
     title = serializers.CharField()
     description = serializers.CharField()
-    type = serializers.ChoiceField(choices=PROJECT_CHOICES, default=PROJECT_CHOICES[0][1])
+    type = serializers.ChoiceField(choices=PROJECT_CHOICES)
 
     class Meta:
         model = Projects
@@ -101,8 +100,31 @@ class IssueSerializer(serializers.ModelSerializer):
     class Meta:
         model = Issues
         fields = (
-            "__all__"
+            "title",
+            "desc",
+            "tag",
+            "priority",
+            "status",
+            "assignee_user"
         )
+
+    def get_project_id(self):
+        return Projects(project=self.context.get('request').parser_context.get('kwargs').get('project_pk'))
+
+    def create(self, validated_data):
+        author_user_id = self.context.get("request", None).user
+        issue = Issues(
+            title=self.validated_data["title"],
+            desc=self.validated_data["desc"],
+            tag=self.validated_data["tag"],
+            priority=self.validated_data["priority"],
+            status=self.validated_data["status"],
+            assignee_user=self.validated_data["assignee_user"],
+            author_user=author_user_id,
+            project=self.get_project_id(),
+        )
+        issue.save()
+        return issue
 
 
 class CommentSerializer(serializers.ModelSerializer):
@@ -110,8 +132,22 @@ class CommentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Comments
         fields = (
-            "__all__"
+            "description",
         )
+
+    def get_issue_id(self):
+        return Issues(id=self.context.get('request').parser_context.get('kwargs').get('issue_pk'))
+
+    def create(self, validated_data):
+        author_user_id = self.context.get("request", None).user
+        comment = Comments(
+            description=validated_data["description"],
+            author_user=author_user_id,
+            issue=self.get_issue_id()
+        )
+        comment.save()
+        return comment
+
 
 
 class LoginUserSerializer(serializers.ModelSerializer):
@@ -131,7 +167,6 @@ class MyTokenObtainSerializer(TokenObtainSerializer):
 
     def __init__(self, *args, **kwargs):
         super(MyTokenObtainSerializer, self).__init__(*args, **kwargs)
-        print("dedans")
         self.fields[self.username_field] = serializers.EmailField()
         self.fields["password"] = serializers.CharField()
 
