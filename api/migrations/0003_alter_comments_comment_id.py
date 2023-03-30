@@ -4,15 +4,14 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('api', '0002_rename_author_user_id_projects_author_user'),
+        ("api", "0002_rename_author_user_id_projects_author_user"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='comments',
-            name='comment_id',
+            model_name="comments",
+            name="comment_id",
             field=models.AutoField(editable=False, primary_key=True, serialize=False),
         ),
     ]

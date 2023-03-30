@@ -1,45 +1,22 @@
 """import """
-import json
-
-from django.contrib.auth import authenticate, get_user_model
-from django.http import JsonResponse
-from rest_framework import serializers, status
-from rest_framework.response import Response
-from rest_framework.validators import UniqueValidator
-from rest_framework_simplejwt.serializers import (
-    TokenObtainPairSerializer,
-    PasswordField, TokenObtainSerializer,
-)
-from rest_framework_simplejwt.tokens import RefreshToken
-from sqlparse.compat import text_type
-
-from .choices.db_choices import PROJECT_CHOICES, TAG_CHOICES, PRIORITY_CHOICES, STATUS_CHOICES
-from .models import Users, Projects, Issues, Comments, Contributors
-from .utils import get_tokens_for_user
-from .validators.check_data import CheckPasswordPolicy
+from rest_framework import serializers
 from rest_framework.authtoken.models import Token
+from rest_framework.validators import UniqueValidator
+from rest_framework_simplejwt.serializers import TokenObtainSerializer
+from rest_framework_simplejwt.tokens import RefreshToken
+
+from .models import Comments, Contributors, Issues, Projects, Users
+from .validators.check_data import CheckPasswordPolicy
 
 
 class UserSerializer(serializers.ModelSerializer):
-    password = serializers.CharField(
-        style={"input_type": "password"}, write_only=True
-    )
-    password2 = serializers.CharField(
-        style={"input_type": "password"}, write_only=True
-    )
-    email = serializers.EmailField(
-        required=True, validators=[UniqueValidator(queryset=Users.objects.all())]
-    )
+    password = serializers.CharField(style={"input_type": "password"}, write_only=True)
+    password2 = serializers.CharField(style={"input_type": "password"}, write_only=True)
+    email = serializers.EmailField(required=True, validators=[UniqueValidator(queryset=Users.objects.all())])
 
     class Meta:
         model = Users
-        fields = (
-            "email",
-            "password",
-            "password2",
-            "first_name",
-            "last_name"
-        )
+        fields = ("email", "password", "password2", "first_name", "last_name")
 
     def create(self, validated_data):
         user = Users(
@@ -58,16 +35,19 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class ProjectSerializer(serializers.ModelSerializer):
-    title = serializers.CharField()
-    description = serializers.CharField()
-    type = serializers.ChoiceField(choices=PROJECT_CHOICES)
-
     class Meta:
         model = Projects
         fields = (
             "title",
             "description",
             "type",
+            "project",
+            "author_user_id",
+        )
+
+        read_only_fields = (
+            "project",
+            "author_user_id",
         )
 
     def create(self, validated_data):
@@ -76,27 +56,22 @@ class ProjectSerializer(serializers.ModelSerializer):
             title=validated_data["title"],
             description=validated_data["description"],
             type=validated_data["type"],
-            author_user=author_user_id
+            author_user=author_user_id,
         )
         project.save()
-        Contributors(
-            project_id=project.project,
-            user_id=author_user_id.user_id
-        ).save()
+        Contributors(project_id=project.project, user_id=author_user_id.user_id).save()
         return project
 
 
 class ContributorSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = Contributors
-        fields = (
-            "__all__"
-        )
+        fields = ("project", "user")
+
+        read_only_fields = ("id",)
 
 
 class IssueSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = Issues
         fields = (
@@ -105,11 +80,14 @@ class IssueSerializer(serializers.ModelSerializer):
             "tag",
             "priority",
             "status",
-            "assignee_user"
+            "assignee_user",
+            "id",
         )
 
+        read_only_fields = ("id",)
+
     def get_project_id(self):
-        return Projects(project=self.context.get('request').parser_context.get('kwargs').get('project_pk'))
+        return Projects(project=self.context.get("request").parser_context.get("kwargs").get("project_pk"))
 
     def create(self, validated_data):
         author_user_id = self.context.get("request", None).user
@@ -128,26 +106,26 @@ class IssueSerializer(serializers.ModelSerializer):
 
 
 class CommentSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = Comments
         fields = (
             "description",
+            "comment_id",
         )
+        read_only_fields = ("comment_id",)
 
     def get_issue_id(self):
-        return Issues(id=self.context.get('request').parser_context.get('kwargs').get('issue_pk'))
+        return Issues(id=self.context.get("request").parser_context.get("kwargs").get("issue_pk"))
 
     def create(self, validated_data):
         author_user_id = self.context.get("request", None).user
         comment = Comments(
             description=validated_data["description"],
             author_user=author_user_id,
-            issue=self.get_issue_id()
+            issue=self.get_issue_id(),
         )
         comment.save()
         return comment
-
 
 
 class LoginUserSerializer(serializers.ModelSerializer):
@@ -171,28 +149,22 @@ class MyTokenObtainSerializer(TokenObtainSerializer):
         self.fields["password"] = serializers.CharField()
 
     def validate(self, attrs):
-        # self.user = authenticate(**{
-        #     self.username_field: attrs[self.username_field],
-        #     'password': attrs['password'],
-        # })
         self.user = Users.objects.filter(email=attrs[self.username_field]).first()
 
         if not self.user:
-            raise serializers.ValidationError('The user is not valid.')
+            raise serializers.ValidationError("The user is not valid.")
 
         if self.user:
-            if not self.user.check_password(attrs['password']):
-                raise serializers.ValidationError('Incorrect credentials.')
+            if not self.user.check_password(attrs["password"]):
+                raise serializers.ValidationError("Incorrect credentials.")
         if self.user is None or not self.user.is_active:
-            raise serializers.ValidationError('No active account found with the given credentials')
+            raise serializers.ValidationError("No active account found with the given credentials")
 
-        #return JsonResponse({}, status=status.HTTP_200_OK)
         return {}
 
     @classmethod
     def get_token(cls, user):
-        raise NotImplemented(
-            'Must implement `get_token` method for `MyTokenObtainSerializer` subclasses')
+        raise NotImplemented("Must implement `get_token` method for `MyTokenObtainSerializer` subclasses")
 
 
 class MyTokenObtainPairSerializer(MyTokenObtainSerializer):
@@ -204,7 +176,7 @@ class MyTokenObtainPairSerializer(MyTokenObtainSerializer):
         data = super(MyTokenObtainPairSerializer, self).validate(attrs)
         refresh = self.get_token(self.user)
 
-        data['refresh'] = str(refresh)
-        data['access'] = str(refresh.access_token)
+        data["refresh"] = str(refresh)
+        data["access"] = str(refresh.access_token)
 
         return data

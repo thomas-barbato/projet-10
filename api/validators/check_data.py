@@ -1,6 +1,7 @@
 """import """
 import re
 from pathlib import Path
+
 from django.core.exceptions import ValidationError
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext as _
@@ -13,9 +14,7 @@ class CheckPasswordPolicy:
     """docstring"""
 
     def __init__(self):
-        self.password_pattern = (
-            "^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$"
-        )
+        self.password_pattern = "^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$"
 
     def validate(self, password, password2):
         """
@@ -26,9 +25,7 @@ class CheckPasswordPolicy:
         At least one special character, You can remove this condition by removing (?=.*?[#?!@$%^&*-])
         """
         if password != password2:
-            raise serializers.ValidationError(
-                {"password": "Les mots de passe saisis ne sont pas identiques"}
-            )
+            raise serializers.ValidationError({"password": "Les mots de passe saisis ne sont pas identiques"})
         if re.match(self.password_pattern, password) is None:
             raise serializers.ValidationError(
                 {

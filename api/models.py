@@ -1,13 +1,9 @@
-
-from django.contrib.auth.models import BaseUserManager, AbstractUser, UserManager
-from django.db import models
 import os
-from .choices.db_choices import (
-    PRIORITY_CHOICES,
-    TAG_CHOICES,
-    STATUS_CHOICES,
-    PROJECT_CHOICES,
-)
+
+from django.contrib.auth.models import AbstractUser, BaseUserManager, UserManager
+from django.db import models
+
+from .choices.db_choices import PRIORITY_CHOICES, PROJECT_CHOICES, STATUS_CHOICES, TAG_CHOICES
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "api.settings")
 
@@ -42,20 +38,12 @@ class MyUserManager(BaseUserManager):
 class Users(AbstractUser):
     user_id = models.AutoField(primary_key=True, editable=False)
 
-    first_name = models.CharField(max_length=128, blank=True)
-    last_name = models.CharField(max_length=128, blank=True)
     email = models.EmailField(blank=False, unique=True)
-    password = models.CharField(max_length=255, blank=False)
     is_admin = models.BooleanField(default=False)
-    username = models.CharField(max_length=255, blank=True)
-    is_staff = models.BooleanField(default=False)
-    is_active = models.BooleanField(default=True)
-    date_joined = models.DateTimeField(auto_now_add=True)
-
     objects = UserManager()
 
-    USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = ['first_name', 'last_name']
+    USERNAME_FIELD = "email"
+    REQUIRED_FIELDS = ["first_name", "last_name"]
 
     def has_perm(self, perm, obj=None):
         return True
@@ -71,39 +59,27 @@ class Projects(models.Model):
     project = models.AutoField(primary_key=True, editable=False)
     title = models.CharField(max_length=100)
     description = models.CharField(max_length=255)
-    type = models.CharField(
-        max_length=15, choices=PROJECT_CHOICES
-    )
-    author_user = models.ForeignKey(Users, related_name='project_created_by', on_delete=models.RESTRICT)
+    type = models.CharField(max_length=15, choices=PROJECT_CHOICES)
+    author_user = models.ForeignKey(Users, related_name="project_created_by", on_delete=models.RESTRICT)
 
     def __str__(self):
         return self.title
 
 
 class Contributors(models.Model):
-    user = models.ForeignKey(Users, related_name='user_contributor', on_delete=models.CASCADE)
-    project = models.ForeignKey(Projects, related_name='project_contributor', on_delete=models.CASCADE)
+    user = models.ForeignKey(Users, related_name="user_contributor", on_delete=models.CASCADE)
+    project = models.ForeignKey(Projects, related_name="project_contributor", on_delete=models.CASCADE)
 
 
 class Issues(models.Model):
     title = models.CharField(max_length=100, blank=False)
     desc = models.CharField(max_length=255)
-    tag = models.CharField(
-        max_length=15, choices=TAG_CHOICES
-    )
-    priority = models.CharField(
-        max_length=15, choices=PRIORITY_CHOICES
-    )
+    tag = models.CharField(max_length=15, choices=TAG_CHOICES)
+    priority = models.CharField(max_length=15, choices=PRIORITY_CHOICES)
     project = models.ForeignKey(Projects, on_delete=models.CASCADE)
-    status = models.CharField(
-        max_length=15, choices=STATUS_CHOICES
-    )
-    author_user = models.ForeignKey(
-        Users, related_name="issue_author", on_delete=models.RESTRICT
-    )
-    assignee_user = models.ForeignKey(
-        Users, related_name="issue_assigned_to", on_delete=models.RESTRICT
-    )
+    status = models.CharField(max_length=15, choices=STATUS_CHOICES)
+    author_user = models.ForeignKey(Users, related_name="issue_author", on_delete=models.RESTRICT)
+    assignee_user = models.ForeignKey(Users, related_name="issue_assigned_to", on_delete=models.RESTRICT)
     created_time = models.DateTimeField("Created Time", auto_now_add=True)
 
     def __str__(self):
