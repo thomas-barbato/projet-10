@@ -4,7 +4,8 @@ from api.models import Users, Contributors, Projects, Comments, Issues
 
 @admin.register(Users)
 class UserAdmin(admin.ModelAdmin):
-    fields = ("user_id", "is_active", "email", "fist_name", "last_name", "date_joined")
+    fields = ("user_id", "is_active", "email", "password", "first_name", "last_name", "date_joined")
+    readonly_fields = ("user_id", )
 
     def __str__(self):
         return "email"
