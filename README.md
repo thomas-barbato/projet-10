@@ -61,13 +61,13 @@ Pour accéder à l'interface d'administration, rendez-vous à l'url suivante:
 
 ## Acceder à postman
 
-Pour pouvoir lancer des requetes à l'API, nous utilisons donc POSTMAN
+**Pour pouvoir lancer des requetes à l'API, nous utilisons donc POSTMAN
 et maintenant qu'il est lancé, veuillez importer la collection qui se trouve
-à cette url :
+à cette url :**
 
 ``https://github.com/thomas-barbato/projet-10/blob/main/projet-10.postman_collection.json``
 
-Ensuite:
+**Ensuite:**
 
 1. Cliquez sur "importer"
 2. Importer la collection précédemment téléchargée
@@ -75,11 +75,11 @@ Ensuite:
 - via la collection: Dossier : User , fichier : login
 - via l'url:``http://127.0.0.1:8000/api/login`` 
 
-Un exemple d'utilisateur déjà créé que vous pouvez utiliser : 
+**Un exemple d'utilisateur déjà créé que vous pouvez utiliser :** 
 
 - email: ``test9@test.com`` , password : ``Thomas404*``
 
-Une fois connecté :
+**Une fois connecté :**
 
 l'API vous génèrera un jeton (token) d'identification, **pour vous en servir:**
 
