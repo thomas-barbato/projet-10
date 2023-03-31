@@ -1,6 +1,5 @@
 """import """
 from rest_framework import serializers
-from rest_framework.authtoken.models import Token
 from rest_framework.validators import UniqueValidator
 from rest_framework_simplejwt.serializers import TokenObtainSerializer
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -29,7 +28,6 @@ class UserSerializer(serializers.ModelSerializer):
         CheckPasswordPolicy().validate(password=password, password2=password2)
         user.set_password(password)
         user.save()
-        token = Token.objects.create(user=user)
 
         return user
 
@@ -164,7 +162,7 @@ class MyTokenObtainSerializer(TokenObtainSerializer):
 
     @classmethod
     def get_token(cls, user):
-        raise NotImplemented("Must implement `get_token` method for `MyTokenObtainSerializer` subclasses")
+        raise NotImplementedError("Must implement `get_token` method for `MyTokenObtainSerializer` subclasses")
 
 
 class MyTokenObtainPairSerializer(MyTokenObtainSerializer):

@@ -22,15 +22,14 @@ class MyUserManager(BaseUserManager):
         users.save(user=self._db)
         return users
 
-    def create_superuser(self, email, password, first_name=None, last_name=None):
+    def create_superuser(self, email, password, **extra_fields):
         user = self.create_user(
-            email,
+            email=email,
             password=password,
-            first_name=first_name,
-            last_name=last_name,
         )
         user.is_admin = True
-        user.save(using=self._db)
+        user.is_staff = True
+        user.save()
         return user
 
 
@@ -70,6 +69,9 @@ class Contributors(models.Model):
     user = models.ForeignKey(Users, related_name="user_contributor", on_delete=models.CASCADE)
     project = models.ForeignKey(Projects, related_name="project_contributor", on_delete=models.CASCADE)
 
+    def __str__(self):
+        return f"project: {self.project}, {self.user}"
+
 
 class Issues(models.Model):
     title = models.CharField(max_length=100, blank=False)
@@ -92,3 +94,6 @@ class Comments(models.Model):
     author_user = models.ForeignKey(Users, on_delete=models.CASCADE)
     issue = models.ForeignKey(Issues, on_delete=models.RESTRICT)
     created_time = models.DateTimeField("Created Time", auto_now_add=True)
+
+    def __str__(self):
+        return self.description

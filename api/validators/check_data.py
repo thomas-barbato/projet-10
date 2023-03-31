@@ -1,10 +1,7 @@
 """import """
 import re
-from pathlib import Path
 
-from django.core.exceptions import ValidationError
 from django.utils.safestring import mark_safe
-from django.utils.translation import gettext as _
 from rest_framework import serializers
 
 from ..models import Users
