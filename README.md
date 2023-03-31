@@ -25,7 +25,7 @@ Et pour ce projet nous utiliserons **postman**
 
 
 2. Importez le projet depuis git:
-`git clone https://github.com/thomas-barbato/projet-9.git`
+`git clone https://github.com/thomas-barbato/projet-10.git`
 
 3. Créez un environnement virutel:
 `python3 -m venv /path/to/new/virtual/environment`
