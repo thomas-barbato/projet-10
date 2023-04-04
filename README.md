@@ -56,8 +56,7 @@ Pour accéder à l'interface d'administration, rendez-vous à l'url suivante:
 
 ``http://127.0.0.1:8000/admin``
 
-``Email : admin@test.com``
-``Password: Thomas404*``
+- email: ``admin@test.com`` , password : ``Thomas404*``
 
 ## Acceder à postman
 
@@ -77,7 +76,9 @@ et maintenant qu'il est lancé, veuillez importer la collection qui se trouve
 
 **Un exemple d'utilisateur déjà créé que vous pouvez utiliser :** 
 
-- email: ``test9@test.com`` , password : ``Thomas404*``
+- email: ``user1@test.com`` , password : ``Thomas404*``
+- email: ``user2@test.com`` , password : ``Thomas404*``
+- email: ``user3@test.com`` , password : ``Thomas404*``
 
 **Une fois connecté :**
 

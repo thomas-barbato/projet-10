@@ -16,6 +16,11 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = Users
         fields = ("email", "password", "password2", "first_name", "last_name")
+        read_only_fields = ("user_id", )
+
+    def validate(self, attrs):
+        CheckPasswordPolicy().validate(password=attrs["password"], password2=attrs["password2"])
+        return super().validate(attrs)
 
     def create(self, validated_data):
         user = Users(
@@ -24,8 +29,6 @@ class UserSerializer(serializers.ModelSerializer):
             last_name=self.validated_data["last_name"],
         )
         password = self.validated_data["password"]
-        password2 = self.validated_data["password2"]
-        CheckPasswordPolicy().validate(password=password, password2=password2)
         user.set_password(password)
         user.save()
 
