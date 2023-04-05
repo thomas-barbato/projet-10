@@ -21,6 +21,7 @@ from .serializers import (
 
 from django.core.exceptions import ObjectDoesNotExist
 
+
 class UserViewset(ModelViewSet):
     permission_classes = (AllowAny,)
     serializer_class = UserSerializer
@@ -106,6 +107,11 @@ class CommentViewset(viewsets.ModelViewSet):
 
     def get_queryset(self):
         return Comments.objects.filter(issue_id=self.kwargs["issue_pk"])
+
+    def list(self, request, *args, **kwargs):
+        if Contributors.objects.filter(project=self.kwargs["project_pk"], user=request.user).exists():
+            return super().list(request, *args, **kwargs)
+        return Response(self.message, status=status.HTTP_403_FORBIDDEN)
 
     def retrieve(self, request, *args, **kwargs):
         if Contributors.objects.filter(project=self.kwargs["project_pk"], user=request.user).exists():

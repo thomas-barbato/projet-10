@@ -13,8 +13,8 @@ STATUS_CHOICES = [
 ]
 
 PROJECT_CHOICES = [
-    ("WEB", "Site web"),
-    ("APP", "Application"),
-    ("ANDROID", "Android"),
-    ("IOS", "Ios"),
+    ("front-end", "front-end"),
+    ("back-end", "back-end"),
+    ("android", "Android"),
+    ("ios", "iOS"),
 ]

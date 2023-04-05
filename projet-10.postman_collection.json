@@ -16,9 +16,7 @@
 							"listen": "test",
 							"script": {
 								"exec": [
-									"const response = pm.response.json()\r",
-									"\r",
-									"pm.environment.set(\"jwt_token\", response.access_token)"
+									""
 								],
 								"type": "text/javascript"
 							}
@@ -32,7 +30,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"email\": \"test1234@test.com\",\r\n    \"password\": \"Thomas404*\",\r\n    \"password2\": \"Thomas404*\",\r\n    \"first_name\": \"\",\r\n    \"last_name\": \"\"\r\n}",
+							"raw": "{\r\n    \"email\": \"user3@test.com\",\r\n    \"password\": \"Thomas404*\",\r\n    \"password2\": \"Thomas404*\",\r\n    \"first_name\": \"\",\r\n    \"last_name\": \"\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -66,7 +64,7 @@
 							"script": {
 								"exec": [
 									"var jsonData = JSON.parse(responseBody);\r",
-									"pm.environment.set(\"jwt_token_new\", jsonData.access);"
+									"pm.environment.set(\"jwt_token\", jsonData.access);"
 								],
 								"type": "text/javascript"
 							}
@@ -87,7 +85,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"email\": \"test2@test.com\",\r\n    \"password\": \"Thomas404*\"\r\n}",
+							"raw": "{\r\n    \"email\": \"user2@test.com\",\r\n    \"password\": \"Thomas404*\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -111,7 +109,51 @@
 							]
 						}
 					},
-					"response": []
+					"response": [
+						{
+							"name": "alternate_user_login",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text",
+										"disabled": true
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"email\": \"user3@test.com\",\r\n    \"password\": \"Thomas404*\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://0.0.0.0:8000/api/login/",
+									"protocol": "http",
+									"host": [
+										"0",
+										"0",
+										"0",
+										"0"
+									],
+									"port": "8000",
+									"path": [
+										"api",
+										"login",
+										""
+									]
+								}
+							},
+							"_postman_previewlanguage": null,
+							"header": null,
+							"cookie": [],
+							"body": null
+						}
+					]
 				},
 				{
 					"name": "token_refresh",
@@ -123,7 +165,7 @@
 							"formdata": [
 								{
 									"key": "refresh",
-									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoicmVmcmVzaCIsImV4cCI6MTY3OTY5NjI4OCwiaWF0IjoxNjc5NjA5ODg4LCJqdGkiOiIxODE0NTEzNDRmZWQ0NmI4OGY0ZGEwNjJjNjVhOThkYiIsInVzZXJfaWQiOjE1fQ.UDiJwh3UiMSLVT3PPs6Dxf_jPBkkf3QV23xx9Amw9Do",
+									"value": "{{ jwt_token }}",
 									"description": "Refresh part of a token in value, made to change expiration date\n",
 									"type": "text"
 								}
@@ -206,7 +248,7 @@
 							}
 						],
 						"url": {
-							"raw": "http://127.0.0.1:8000/api/projects/4/",
+							"raw": "http://127.0.0.1:8000/api/projects/",
 							"protocol": "http",
 							"host": [
 								"127",
@@ -218,7 +260,6 @@
 							"path": [
 								"api",
 								"projects",
-								"4",
 								""
 							]
 						}
@@ -270,7 +311,7 @@
 							}
 						],
 						"url": {
-							"raw": "http://127.0.0.1:8000/api/projects/4/",
+							"raw": "http://127.0.0.1:8000/api/projects/2/",
 							"protocol": "http",
 							"host": [
 								"127",
@@ -282,7 +323,7 @@
 							"path": [
 								"api",
 								"projects",
-								"4",
+								"2",
 								""
 							]
 						}
@@ -372,7 +413,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"title\": \"projet avec alexandre2\",\r\n    \"description\": \"test avec alexandre\",\r\n    \"type\": \"WEB\"\r\n}",
+							"raw": "{\r\n    \"title\": \"projet user1\",\r\n    \"description\": \"description projet user1\",\r\n    \"type\": \"front-end\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -434,7 +475,7 @@
 								}
 							]
 						},
-						"method": "PATCH",
+						"method": "PUT",
 						"header": [
 							{
 								"key": "Postman-Token",
@@ -481,7 +522,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"title\": \"AAAAEDITED 1234\",\r\n    \"description\": \"TestDescriptionTEST\",\r\n    \"type\": \"APP\"\r\n}",
+							"raw": "{\r\n    \"title\": \"another project edit\",\r\n    \"description\": \"TestDescriptionTEST\",\r\n    \"type\": \"APP\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -489,7 +530,7 @@
 							}
 						},
 						"url": {
-							"raw": "http://127.0.0.1:8000/api/projects/4/",
+							"raw": "http://127.0.0.1:8000/api/projects/2/",
 							"protocol": "http",
 							"host": [
 								"127",
@@ -501,7 +542,7 @@
 							"path": [
 								"api",
 								"projects",
-								"4",
+								"2",
 								""
 							]
 						}
@@ -584,7 +625,7 @@
 							}
 						],
 						"url": {
-							"raw": "http://127.0.0.1:8000/api/projects/8/",
+							"raw": "http://127.0.0.1:8000/api/projects/2/",
 							"protocol": "http",
 							"host": [
 								"127",
@@ -596,7 +637,7 @@
 							"path": [
 								"api",
 								"projects",
-								"8",
+								"2",
 								""
 							]
 						}
@@ -700,7 +741,7 @@
 							}
 						},
 						"url": {
-							"raw": "http://127.0.0.1:8000/api/projects/4/users/",
+							"raw": "http://127.0.0.1:8000/api/projects/2/users/",
 							"protocol": "http",
 							"host": [
 								"127",
@@ -712,7 +753,7 @@
 							"path": [
 								"api",
 								"projects",
-								"4",
+								"2",
 								"users",
 								""
 							]
@@ -803,7 +844,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"project\": 4,\r\n    \"user\": 12\r\n}",
+							"raw": "{\r\n    \"project\": 2,\r\n    \"user\": 1\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -811,7 +852,7 @@
 							}
 						},
 						"url": {
-							"raw": "http://127.0.0.1:8000/api/projects/4/users/",
+							"raw": "http://127.0.0.1:8000/api/projects/2/users/",
 							"protocol": "http",
 							"host": [
 								"127",
@@ -823,7 +864,7 @@
 							"path": [
 								"api",
 								"projects",
-								"4",
+								"2",
 								"users",
 								""
 							]
@@ -916,7 +957,7 @@
 							}
 						},
 						"url": {
-							"raw": "http://127.0.0.1:8000/api/projects/4/users/12/",
+							"raw": "http://127.0.0.1:8000/api/projects/2/users/2/",
 							"protocol": "http",
 							"host": [
 								"127",
@@ -928,9 +969,9 @@
 							"path": [
 								"api",
 								"projects",
-								"4",
+								"2",
 								"users",
-								"12",
+								"2",
 								""
 							]
 						}
@@ -1034,7 +1075,7 @@
 							}
 						},
 						"url": {
-							"raw": "http://127.0.0.1:8000/api/projects/4/issues/2/",
+							"raw": "http://127.0.0.1:8000/api/projects/2/issues/",
 							"protocol": "http",
 							"host": [
 								"127",
@@ -1046,9 +1087,8 @@
 							"path": [
 								"api",
 								"projects",
-								"4",
-								"issues",
 								"2",
+								"issues",
 								""
 							]
 						}
@@ -1147,7 +1187,7 @@
 							}
 						},
 						"url": {
-							"raw": "http://127.0.0.1:8000/api/projects/4/issues/2/",
+							"raw": "http://127.0.0.1:8000/api/projects/2/issues/5/",
 							"protocol": "http",
 							"host": [
 								"127",
@@ -1159,9 +1199,9 @@
 							"path": [
 								"api",
 								"projects",
-								"4",
-								"issues",
 								"2",
+								"issues",
+								"5",
 								""
 							]
 						}
@@ -1251,7 +1291,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"title\": \"NOUVEAU PROBLEME\",\r\n    \"desc\": \"Another issue bug test\",\r\n    \"tag\": \"BUG\",\r\n    \"priority\": \"FAIBLE\",\r\n    \"status\": \"A_FAIRE\",\r\n    \"assignee_user\": 11\r\n}",
+							"raw": "{\r\n    \"title\": \"user2 issue\",\r\n    \"desc\": \"description user1 issue\",\r\n    \"tag\": \"BUG\",\r\n    \"priority\": \"FAIBLE\",\r\n    \"status\": \"A_FAIRE\",\r\n    \"assignee_user\": 1\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -1259,7 +1299,7 @@
 							}
 						},
 						"url": {
-							"raw": "http://127.0.0.1:8000/api/projects/4/issues/",
+							"raw": "http://127.0.0.1:8000/api/projects/2/issues/",
 							"protocol": "http",
 							"host": [
 								"127",
@@ -1271,7 +1311,7 @@
 							"path": [
 								"api",
 								"projects",
-								"4",
+								"2",
 								"issues",
 								""
 							]
@@ -1315,7 +1355,7 @@
 								}
 							]
 						},
-						"method": "PATCH",
+						"method": "PUT",
 						"header": [
 							{
 								"key": "Postman-Token",
@@ -1362,7 +1402,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"title\": \"EDITER TEST PROBLEME\",\r\n    \"desc\": \"Another issue bug test\",\r\n    \"tag\": \"TACHE\",\r\n    \"priority\": \"ELEVEE\",\r\n    \"status\": \"TERMINE\",\r\n    \"assignee_user\": 11\r\n}",
+							"raw": "{\r\n    \"title\": \"EDITER user1 issue\",\r\n    \"desc\": \"description user1 issue\",\r\n    \"tag\": \"BUG\",\r\n    \"priority\": \"ELEVEE\",\r\n    \"status\": \"A_FAIRE\",\r\n    \"assignee_user\": 1\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -1370,7 +1410,7 @@
 							}
 						},
 						"url": {
-							"raw": "http://127.0.0.1:8000/api/projects/1/issues/8/",
+							"raw": "http://127.0.0.1:8000/api/projects/2/issues/5/",
 							"protocol": "http",
 							"host": [
 								"127",
@@ -1382,9 +1422,9 @@
 							"path": [
 								"api",
 								"projects",
-								"1",
+								"2",
 								"issues",
-								"8",
+								"5",
 								""
 							]
 						}
@@ -1476,7 +1516,7 @@
 							}
 						},
 						"url": {
-							"raw": "http://127.0.0.1:8000/api/projects/4/issues/8/",
+							"raw": "http://127.0.0.1:8000/api/projects/2/issues/5/",
 							"protocol": "http",
 							"host": [
 								"127",
@@ -1488,9 +1528,9 @@
 							"path": [
 								"api",
 								"projects",
-								"4",
+								"2",
 								"issues",
-								"8",
+								"5",
 								""
 							]
 						}
@@ -1594,7 +1634,7 @@
 							}
 						},
 						"url": {
-							"raw": "http://127.0.0.1:8000/api/projects/4/issues/2/comments/",
+							"raw": "http://127.0.0.1:8000/api/projects/2/issues/5/comments/",
 							"protocol": "http",
 							"host": [
 								"127",
@@ -1606,9 +1646,9 @@
 							"path": [
 								"api",
 								"projects",
-								"4",
-								"issues",
 								"2",
+								"issues",
+								"5",
 								"comments",
 								""
 							]
@@ -1708,7 +1748,7 @@
 							}
 						},
 						"url": {
-							"raw": "http://127.0.0.1:8000/api/projects/4/issues/2/comments/2",
+							"raw": "http://127.0.0.1:8000/api/projects/2/issues/5/comments/4",
 							"protocol": "http",
 							"host": [
 								"127",
@@ -1720,11 +1760,11 @@
 							"path": [
 								"api",
 								"projects",
-								"4",
-								"issues",
 								"2",
+								"issues",
+								"5",
 								"comments",
-								"2"
+								"4"
 							]
 						}
 					},
@@ -1813,7 +1853,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"description\": \"une nouvelle tentative\"\r\n}",
+							"raw": "{\r\n    \"description\": \"Unsdqsdqsd autre Commentaire d'user2 pour ticket d'user1\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -1821,7 +1861,7 @@
 							}
 						},
 						"url": {
-							"raw": "http://127.0.0.1:8000/api/projects/4/issues/2/comments/",
+							"raw": "http://127.0.0.1:8000/api/projects/2/issues/5/comments/",
 							"protocol": "http",
 							"host": [
 								"127",
@@ -1833,9 +1873,9 @@
 							"path": [
 								"api",
 								"projects",
-								"4",
-								"issues",
 								"2",
+								"issues",
+								"5",
 								"comments",
 								""
 							]
@@ -1879,7 +1919,7 @@
 								}
 							]
 						},
-						"method": "PATCH",
+						"method": "PUT",
 						"header": [
 							{
 								"key": "Postman-Token",
@@ -1926,7 +1966,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"description\": \"UPDATED Un commentaire random UPDATED\"\r\n}",
+							"raw": "{\r\n    \"description\": \"UPDATED un autre commentaire pour issue user 1\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -1934,7 +1974,7 @@
 							}
 						},
 						"url": {
-							"raw": "http://127.0.0.1:8000/api/projects/1/issues/2/comments/5/",
+							"raw": "http://127.0.0.1:8000/api/projects/2/issues/5/comments/4/",
 							"protocol": "http",
 							"host": [
 								"127",
@@ -1946,11 +1986,11 @@
 							"path": [
 								"api",
 								"projects",
-								"1",
-								"issues",
 								"2",
-								"comments",
+								"issues",
 								"5",
+								"comments",
+								"4",
 								""
 							]
 						}
@@ -2042,7 +2082,7 @@
 							}
 						},
 						"url": {
-							"raw": "http://127.0.0.1:8000/api/projects/4/issues/2/comments/6/",
+							"raw": "http://127.0.0.1:8000/api/projects/2/issues/5/comments/4/",
 							"protocol": "http",
 							"host": [
 								"127",
@@ -2054,11 +2094,11 @@
 							"path": [
 								"api",
 								"projects",
-								"4",
-								"issues",
 								"2",
+								"issues",
+								"5",
 								"comments",
-								"6",
+								"4",
 								""
 							]
 						}
