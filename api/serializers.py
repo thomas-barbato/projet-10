@@ -77,6 +77,7 @@ class ContributorSerializer(serializers.ModelSerializer):
 
 
 class IssueSerializer(serializers.ModelSerializer):
+
     class Meta:
         model = Issues
         fields = (
@@ -88,6 +89,8 @@ class IssueSerializer(serializers.ModelSerializer):
             "assignee_user",
             "id",
         )
+
+        extra_kwargs = {"assignee_user": {"required": False, "allow_null": True}}
 
         read_only_fields = ("id",)
 
@@ -106,10 +109,13 @@ class IssueSerializer(serializers.ModelSerializer):
             tag=self.validated_data["tag"],
             priority=self.validated_data["priority"],
             status=self.validated_data["status"],
-            assignee_user=self.validated_data["assignee_user"],
             author_user=author_user_id,
             project=self.get_project_id(),
         )
+        if self.validated_data.get('assignee_user', None) is None:
+            issue.assignee_user = author_user_id
+        else:
+            issue.assignee_user = self.validated_data["assignee_user"]
         issue.save()
         return issue
 
