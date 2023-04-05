@@ -1,5 +1,4 @@
 from rest_framework import permissions
-from .models import Contributors
 
 
 # https://stackoverflow.com/questions/59141266/drf-only-author-can-create-or-update-the-book-permission

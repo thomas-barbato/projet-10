@@ -11,15 +11,19 @@ from .validators.check_data import CheckPasswordPolicy
 class UserSerializer(serializers.ModelSerializer):
     password = serializers.CharField(style={"input_type": "password"}, write_only=True)
     password2 = serializers.CharField(style={"input_type": "password"}, write_only=True)
-    email = serializers.EmailField(required=True, validators=[UniqueValidator(queryset=Users.objects.all())])
+    email = serializers.EmailField(
+        required=True, validators=[UniqueValidator(queryset=Users.objects.all())]
+    )
 
     class Meta:
         model = Users
         fields = ("email", "password", "password2", "first_name", "last_name")
-        read_only_fields = ("user_id", )
+        read_only_fields = ("user_id",)
 
     def validate(self, attrs):
-        CheckPasswordPolicy().validate(password=attrs["password"], password2=attrs["password2"])
+        CheckPasswordPolicy().validate(
+            password=attrs["password"], password2=attrs["password2"]
+        )
         return super().validate(attrs)
 
     def create(self, validated_data):
@@ -88,7 +92,11 @@ class IssueSerializer(serializers.ModelSerializer):
         read_only_fields = ("id",)
 
     def get_project_id(self):
-        return Projects(project=self.context.get("request").parser_context.get("kwargs").get("project_pk"))
+        return Projects(
+            project=self.context.get("request")
+            .parser_context.get("kwargs")
+            .get("project_pk")
+        )
 
     def create(self, validated_data):
         author_user_id = self.context.get("request", None).user
@@ -116,7 +124,9 @@ class CommentSerializer(serializers.ModelSerializer):
         read_only_fields = ("comment_id",)
 
     def get_issue_id(self):
-        return Issues(id=self.context.get("request").parser_context.get("kwargs").get("issue_pk"))
+        return Issues(
+            id=self.context.get("request").parser_context.get("kwargs").get("issue_pk")
+        )
 
     def create(self, validated_data):
         author_user_id = self.context.get("request", None).user
@@ -159,13 +169,17 @@ class MyTokenObtainSerializer(TokenObtainSerializer):
             if not self.user.check_password(attrs["password"]):
                 raise serializers.ValidationError("Incorrect credentials.")
         if self.user is None or not self.user.is_active:
-            raise serializers.ValidationError("No active account found with the given credentials")
+            raise serializers.ValidationError(
+                "No active account found with the given credentials"
+            )
 
         return {}
 
     @classmethod
     def get_token(cls, user):
-        raise NotImplementedError("Must implement `get_token` method for `MyTokenObtainSerializer` subclasses")
+        raise NotImplementedError(
+            "Must implement `get_token` method for `MyTokenObtainSerializer` subclasses"
+        )
 
 
 class MyTokenObtainPairSerializer(MyTokenObtainSerializer):
