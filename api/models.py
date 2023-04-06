@@ -1,14 +1,11 @@
 import os
 
-from django.contrib.auth.models import AbstractUser, BaseUserManager, UserManager
+from django.contrib.auth.models import (AbstractUser, BaseUserManager,
+                                        UserManager)
 from django.db import models
 
-from .choices.db_choices import (
-    PRIORITY_CHOICES,
-    PROJECT_CHOICES,
-    STATUS_CHOICES,
-    TAG_CHOICES,
-)
+from .choices.db_choices import (PRIORITY_CHOICES, PROJECT_CHOICES,
+                                 STATUS_CHOICES, TAG_CHOICES)
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "api.settings")
 
@@ -79,6 +76,7 @@ class Contributors(models.Model):
     project = models.ForeignKey(
         Projects, related_name="project_contributor", on_delete=models.CASCADE
     )
+    role = models.CharField(max_length=20, default="contributeur", null=True)
 
     def __str__(self):
         return f"project: {self.project}, {self.user}"

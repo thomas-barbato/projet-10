@@ -64,7 +64,11 @@ class ProjectSerializer(serializers.ModelSerializer):
             author_user=author_user_id,
         )
         project.save()
-        Contributors(project_id=project.project, user_id=author_user_id.user_id).save()
+        Contributors(
+            project_id=project.project,
+            user_id=author_user_id.user_id,
+            role="responsable",
+        ).save()
         return project
 
 
@@ -77,7 +81,6 @@ class ContributorSerializer(serializers.ModelSerializer):
 
 
 class IssueSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = Issues
         fields = (
@@ -112,7 +115,7 @@ class IssueSerializer(serializers.ModelSerializer):
             author_user=author_user_id,
             project=self.get_project_id(),
         )
-        if self.validated_data.get('assignee_user', None) is None:
+        if self.validated_data.get("assignee_user", None) is None:
             issue.assignee_user = author_user_id
         else:
             issue.assignee_user = self.validated_data["assignee_user"]

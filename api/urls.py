@@ -2,14 +2,8 @@ from django.urls import include, path
 from rest_framework_nested import routers
 from rest_framework_simplejwt.views import TokenRefreshView, TokenVerifyView
 
-from .views import (
-    CommentViewset,
-    ContributorViewset,
-    IssueViewset,
-    MyTokenObtainPairView,
-    ProjectViewset,
-    UserViewset,
-)
+from .views import (CommentViewset, ContributorViewset, IssueViewset,
+                    MyTokenObtainPairView, ProjectViewset, UserViewset)
 
 # /projects/
 # /projects/{pk}/
