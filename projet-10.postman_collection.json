@@ -126,42 +126,6 @@
 							"header": null,
 							"cookie": [],
 							"body": null
-						},
-						{
-							"name": "add_responsable_user",
-							"originalRequest": {
-								"method": "POST",
-								"header": [],
-								"body": {
-									"mode": "raw",
-									"raw": "{\r\n    \"email\": \"user1@test.com\",\r\n    \"password\": \"Thomas404*\",\r\n    \"password2\": \"Thomas404*\",\r\n    \"first_name\": \"\",\r\n    \"last_name\": \"\"\r\n}",
-									"options": {
-										"raw": {
-											"language": "json"
-										}
-									}
-								},
-								"url": {
-									"raw": "http://127.0.0.1:8000/api/signup/",
-									"protocol": "http",
-									"host": [
-										"127",
-										"0",
-										"0",
-										"1"
-									],
-									"port": "8000",
-									"path": [
-										"api",
-										"signup",
-										""
-									]
-								}
-							},
-							"_postman_previewlanguage": null,
-							"header": null,
-							"cookie": [],
-							"body": null
 						}
 					]
 				},
@@ -277,49 +241,6 @@
 								"body": {
 									"mode": "raw",
 									"raw": "{\r\n    \"email\": \"user1@test.com\",\r\n    \"password\": \"Thomas404*\"\r\n}",
-									"options": {
-										"raw": {
-											"language": "json"
-										}
-									}
-								},
-								"url": {
-									"raw": "http://0.0.0.0:8000/api/login/",
-									"protocol": "http",
-									"host": [
-										"0",
-										"0",
-										"0",
-										"0"
-									],
-									"port": "8000",
-									"path": [
-										"api",
-										"login",
-										""
-									]
-								}
-							},
-							"_postman_previewlanguage": null,
-							"header": null,
-							"cookie": [],
-							"body": null
-						},
-						{
-							"name": "responsable_user_login",
-							"originalRequest": {
-								"method": "POST",
-								"header": [
-									{
-										"key": "Content-Type",
-										"value": "application/json",
-										"type": "text",
-										"disabled": true
-									}
-								],
-								"body": {
-									"mode": "raw",
-									"raw": "{\r\n    \"email\": \"user2@test.com\",\r\n    \"password\": \"Thomas404*\"\r\n}",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -1501,7 +1422,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"title\": \"user2 issue2\",\r\n    \"desc\": \"description user2 issue2\",\r\n    \"tag\": \"BUG\",\r\n    \"priority\": \"FAIBLE\",\r\n    \"status\": \"A_FAIRE\"\r\n}",
+							"raw": "{\r\n    \"title\": \"user2 issue2AZDSAZD\",\r\n    \"desc\": \"description user2 issue2\",\r\n    \"tag\": \"BUG\",\r\n    \"priority\": \"FAIBLE\",\r\n    \"status\": \"A_FAIRE\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
