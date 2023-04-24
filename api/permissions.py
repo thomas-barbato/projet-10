@@ -24,7 +24,7 @@ class ProjectsPermissions(permissions.BasePermission):
 
 class IssuesPermissions(permissions.BasePermission):
     def has_permission(self, request, view):
-        if request.method in ["GET", "HEAD", "OPTIONS"]:
+        if request.method in ["GET", "HEAD", "OPTIONS", "POST"]:
             return Contributors.objects.filter(Q(
                     user_id=request.user,
                     project=view.kwargs["project_pk"],
@@ -34,13 +34,6 @@ class IssuesPermissions(permissions.BasePermission):
                     project=view.kwargs["project_pk"],
                     role="responsable",
                 )).exists()
-
-        elif request.method in ["POST"]:
-            return Contributors.objects.filter(
-                    user_id=request.user,
-                    project=view.kwargs["project_pk"],
-                    role="contributeur",
-            ).exists()
         elif request.method in ["PUT", "DELETE"]:
             if Issues.objects.filter(project_id=view.kwargs["project_pk"]).exists():
                 return Contributors.objects.filter(
