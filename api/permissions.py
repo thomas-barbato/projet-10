@@ -1,4 +1,5 @@
 from django.core.exceptions import ObjectDoesNotExist
+from django.db.models import Q
 from rest_framework import permissions
 
 from .models import Comments, Contributors, Issues, Projects
@@ -24,11 +25,15 @@ class ProjectsPermissions(permissions.BasePermission):
 class IssuesPermissions(permissions.BasePermission):
     def has_permission(self, request, view):
         if request.method in ["GET", "HEAD", "OPTIONS", "POST"]:
-            return Contributors.objects.filter(
-                user_id=request.user,
-                project=view.kwargs["project_pk"],
-                role="contributeur",
-            ).exists()
+            return Contributors.objects.filter(Q(
+                    user_id=request.user,
+                    project=view.kwargs["project_pk"],
+                    role="contributeur",
+                ) | Q(
+                    user_id=request.user,
+                    project=view.kwargs["project_pk"],
+                    role="responsable",
+                )).exists()
         elif request.method in ["PUT", "DELETE"]:
             if Issues.objects.filter(project_id=view.kwargs["project_pk"]).exists():
                 return Contributors.objects.filter(
